@@ -1,6 +1,7 @@
 import logging
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, InlineQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext, InlineQueryHandler
+from telegram.ext.filters import Filters  # Corrected import
 from config import TOKEN  # Import the bot token from config.py
 
 # Enable logging
@@ -105,4 +106,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-  
+    
