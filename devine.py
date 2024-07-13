@@ -1,7 +1,7 @@
 import logging
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext, InlineQueryHandler
-from telegram.ext.filters import Filters  # Corrected import
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, InlineQueryHandler
+from pytube import YouTube
 from config import TOKEN  # Import the bot token from config.py
 
 # Enable logging
@@ -20,37 +20,17 @@ def help_command(update: Update, context: CallbackContext) -> None:
 def unknown(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Sorry, I didn't understand that command.")
 
-# Function to handle /kick command to kick a user from the group
-def kick(update: Update, context: CallbackContext) -> None:
-    if context.bot.get_chat_member(update.message.chat_id, update.message.from_user.id).status in ['administrator', 'creator']:
-        user_id = update.message.reply_to_message.from_user.id
-        context.bot.kick_chat_member(update.message.chat_id, user_id)
-    else:
-        update.message.reply_text("You are not allowed to use this command.")
-
-# Function to handle /ban command to ban a user from the group
-def ban(update: Update, context: CallbackContext) -> None:
-    if context.bot.get_chat_member(update.message.chat_id, update.message.from_user.id).status in ['administrator', 'creator']:
-        user_id = update.message.reply_to_message.from_user.id
-        context.bot.ban_chat_member(update.message.chat_id, user_id)
-    else:
-        update.message.reply_text("You are not allowed to use this command.")
-
-# Function to handle /admin command to promote a user in the group
-def promote(update: Update, context: CallbackContext) -> None:
-    if context.bot.get_chat_member(update.message.chat_id, update.message.from_user.id).status in ['administrator', 'creator']:
-        user_id = update.message.reply_to_message.from_user.id
-        context.bot.promote_chat_member(update.message.chat_id, user_id)
-    else:
-        update.message.reply_text("You are not allowed to use this command.")
-
-# Function to handle /users command to demote a user in the group
-def demote(update: Update, context: CallbackContext) -> None:
-    if context.bot.get_chat_member(update.message.chat_id, update.message.from_user.id).status in ['administrator', 'creator']:
-        user_id = update.message.reply_to_message.from_user.id
-        context.bot.promote_chat_member(update.message.chat_id, user_id, can_change_info=False, can_delete_messages=False, can_invite_users=False, can_restrict_members=False)
-    else:
-        update.message.reply_text("You are not allowed to use this command.")
+# Function to download a YouTube video
+def download(update: Update, context: CallbackContext) -> None:
+    url = update.message.text.split(" ", 1)[1]
+    path = "/path/to/download"  # Change this to your desired path
+    try:
+        yt = YouTube(url)
+        stream = yt.streams.get_highest_resolution()
+        stream.download(path)
+        update.message.reply_text(f"Downloaded: {yt.title}")
+    except Exception as e:
+        update.message.reply_text(f"An error occurred: {e}")
 
 # Function to echo messages
 def echo(update: Update, context: CallbackContext) -> None:
@@ -84,10 +64,7 @@ def main() -> None:
     # Register command handlers
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
-    dispatcher.add_handler(CommandHandler("kick", kick))
-    dispatcher.add_handler(CommandHandler("ban", ban))
-    dispatcher.add_handler(CommandHandler("promote", promote))
-    dispatcher.add_handler(CommandHandler("demote", demote))
+    dispatcher.add_handler(CommandHandler("download", download))  # Add the download handler
 
     # Register unknown command handler
     dispatcher.add_handler(MessageHandler(Filters.command, unknown))
@@ -106,4 +83,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-    
